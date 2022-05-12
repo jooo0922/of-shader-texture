@@ -14,6 +14,13 @@ void ofApp::setup(){
     quad.addColor(ofFloatColor(0.0, 0.0, 1.0, 1.0)); // 파랑색
     quad.addColor(ofFloatColor(1.0, 1.0, 1.0, 1.0)); // 흰색
     
+    // 각 버텍스에 uv좌표 데이터도 저장해 줌. (텍스쳐를 quad 에 씌우기 위해!)
+    // uv 좌표계는 NDC 좌표계랑 다르기 때문에 addVertex 에 넣어주는 좌표의 x, y 값이랑은 다를거임!
+    quad.addTexCoord(glm::vec2(0.0, 0.0));
+    quad.addTexCoord(glm::vec2(0.0, 1.0));
+    quad.addTexCoord(glm::vec2(1.0, 1.0));
+    quad.addTexCoord(glm::vec2(1.0, 0.0));
+    
     // 인덱스 버퍼 배열을 quad 메쉬에 추가해 줌.
     // 즉, 앞서 4개의 버텍스들을 추가했는데, 이 버텍스들을 어떤 순서로 사용해서 메쉬를 그릴 것인지에 대한 데이터 구조를 추가해준 것!
     // 왜냐면, 버텍스 4개를 이용해서 2개의 삼각형을 그려 quad(즉, 사각형 평면)을 그릴 거니까, 삼각형 2개를 4개의 버텍스로 그리려면
