@@ -30,7 +30,7 @@ void ofApp::setup(){
     
     // ofShader 객체에 bin/data 폴더에 작성한 셰이더 파일들을 불러와서 로드함.
     // bin/data 디렉토리를 기준으로 한 상대경로이므로, 파일명만 인자로 넣어주면 됨.
-    shader.load("vertex.vert", "brightness.frag");
+    shader.load("vertex.vert", "colormath.frag");
     
     // 오픈프레임웍스 레거시 지원을 비활성화함.
     // 참고로, 이 레거시 기능은 uv좌표 대신 스크린 픽셀 좌표를 사용하는 텍스쳐 유형을 기본으로 함. -> 근데 두 좌표계는 서로 방향이나 구조가 다르니 해당 기능을 비활성화해야 함!
@@ -98,7 +98,7 @@ void ofApp::setup(){
      '알파 블렌딩' 기능을 비활성화하면 됨.
      */
     ofDisableAlphaBlending();
-    brightness = 0.5;
+    brightness = 1.0;
 }
 
 //--------------------------------------------------------------
@@ -166,6 +166,60 @@ void ofApp::draw(){ // draw() 는 렌더링루프 함수라고 했지?
      */
     shader.setUniform1f("brightness", brightness);
     
+    
+    /**
+     아래부터 작성한 코드들은
+     프래그먼트 셰이더에서 벡터에 기반한 색상 연산을 하기 위해
+     
+     텍셀값에 더해줄 vec4 유니폼 변수인 add 와
+     텍셀값에 곱해줄 vec4 유니폼 변수인 multiply 에
+     각각 전송해 줄 glm vec4 값을 setUniform4f() 함수로 쏴주는 거임.
+     
+     현재 colormath.frag 프래그먼트 셰이더에서는
+     곱한 다음 더해주는 MAD 연산 순서에 따라 텍셀값에 두 유니폼 변수를
+     모두 연산해주고 있기 때문에
+     
+     특정 색상값 벡터를 더해줄 것인지 곱해줄 것인지에 따라
+     연산 방식이 달라짐.
+     
+     빼거나 더하고자 한다면, multiply 변수를 (1, 1, 1, 1) 로 전송해서
+     곱셈 연산의 영향이 없도록 하고,
+     
+     곱하고자 한다면, add 변수를 (0, 0, 0, 0) 로 전송해서
+     덧셈 연산의 영향이 없도록 코드를 작성했음.
+     */
+    // 회색을 뺄 때
+//    shader.setUniform4f("multiply", glm::vec4(1.0, 1.0, 1.0, 1.0));
+//    shader.setUniform4f("add", glm::vec4(-0.5, -0.5, -0.5, -1.0));
+    
+    // 회색을 더할 때
+//    shader.setUniform4f("multiply", glm::vec4(1.0, 1.0, 1.0, 1.0));
+//    shader.setUniform4f("add", glm::vec4(0.5, 0.5, 0.5, 1.0));
+    
+    // 파랑색을 더할 때
+//    shader.setUniform4f("multiply", glm::vec4(1.0, 1.0, 1.0, 1.0));
+//    shader.setUniform4f("add", glm::vec4(0.25, 0.25, 1.0, 1.0));
+    
+    // 빨강색을 더할 때
+//    shader.setUniform4f("multiply", glm::vec4(1.0, 1.0, 1.0, 1.0));
+//    shader.setUniform4f("add", glm::vec4(1.0, 0.0, 0.0, 1.0));
+    
+    // -회색을 곱할 때
+//    shader.setUniform4f("multiply", glm::vec4(-0.5, -0.5, -0.5, -1.0));
+//    shader.setUniform4f("add", glm::vec4(0.0, 0.0, 0.0, 0.0));
+    
+    // 그냥 회색을 곱할 때
+//    shader.setUniform4f("multiply", glm::vec4(0.5, 0.5, 0.5, 1.0));
+//    shader.setUniform4f("add", glm::vec4(0.0, 0.0, 0.0, 0.0));
+    
+    // 파랑색을 곱할 때
+//    shader.setUniform4f("multiply", glm::vec4(0.25, 0.25, 1.0, 1.0));
+//    shader.setUniform4f("add", glm::vec4(0.0, 0.0, 0.0, 0.0));
+    
+    // 빨강색을 곱할 때
+    shader.setUniform4f("multiply", glm::vec4(1.0, 0.0, 0.0, 1.0));
+    shader.setUniform4f("add", glm::vec4(0.0, 0.0, 0.0, 0.0));
+
     // quad 메쉬를 그려달라고 gpu에 지시하는 명령 -> 드로우콜이라고 했지?
     // draw() 및 setup() 함수 모두에 접근하기 위해 ofApp.h 헤더파일에 quad 변수를 선언한 것!
     quad.draw();
