@@ -30,12 +30,13 @@ void ofApp::setup(){
     
     // ofShader 객체에 bin/data 폴더에 작성한 셰이더 파일들을 불러와서 로드함.
     // bin/data 디렉토리를 기준으로 한 상대경로이므로, 파일명만 인자로 넣어주면 됨.
-    shader.load("vertex.vert", "colormath.frag");
+    shader.load("vertex.vert", "blendTextures.frag");
     
     // 오픈프레임웍스 레거시 지원을 비활성화함.
     // 참고로, 이 레거시 기능은 uv좌표 대신 스크린 픽셀 좌표를 사용하는 텍스쳐 유형을 기본으로 함. -> 근데 두 좌표계는 서로 방향이나 구조가 다르니 해당 기능을 비활성화해야 함!
     ofDisableArbTex(); // 레거시 기능 비활성화
-    img.load("parrot.png"); // ofShader 와 마찬가지로, bin/data 디렉토리를 기준으로 한 상대경로를 받으므로, 해당 디렉토리에 이미지 파일을 저장했다면 파일명만 인자로 넣어주면 됨.
+    parrotImg.load("parrot.png"); // ofShader 와 마찬가지로, bin/data 디렉토리를 기준으로 한 상대경로를 받으므로, 해당 디렉토리에 이미지 파일을 저장했다면 파일명만 인자로 넣어주면 됨.
+    checkerImg.load("checker.jpeg"); // 텍스쳐 혼합에 사용할 두 번째 텍스쳐인 체크무늬 텍스쳐도 마찬가지로 bin/data 경로에 저장해두고, 파일명만 인자로 넣어서 로드해주면 됨.
     
     /**
      scrolling_uv.vert 라는 버텍스 셰이더 코드에서
@@ -66,7 +67,8 @@ void ofApp::setup(){
      텍스쳐를 직접 수정해줘야 하므로, getTexture() 함수로 ofTexture 객체를
      직접 가져와서 사용했다는 점!
      */
-    img.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+    parrotImg.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
+    checkerImg.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT); // 텍스쳐 혼합을 위해 추가한 두 번째 텍스쳐인 체크무늬 텍스쳐도 랩 모드를 '랩 반복 모드' 로 지정해 줌.
     
     /**
      아래와 같이 brightness 값을 0.5 로 줄 경우,
@@ -132,7 +134,12 @@ void ofApp::draw(){ // draw() 는 렌더링루프 함수라고 했지?
      
      따라서 텍스쳐 이미지는 모든 프래그먼트 셰이더에서 동일한 uniform 변수로 받는 것임!
      */
-    shader.setUniformTexture("parrotTex", img, 0);
+    shader.setUniformTexture("parrotTex", parrotImg, 0);
+    
+    // 앵무새 텍스쳐와 동일한 방식으로 체크무늬 텍스쳐도 셰이더의 해당 유니폼 변수에 전송해 줌.
+    // 이때, 서로 다른 두 개의 텍스쳐를 하나의 셰이더에서 사용하고 있기 때문에, 마지막 인자인 텍스쳐 로케이션값을 다르게 전달해줘야
+    // 각 텍스쳐를 서로 다른 텍스쳐 로케이션에 배정할 수 있음.
+    shader.setUniformTexture("checkerboardTex", checkerImg, 1);
     
     /**
      scroll_uv.vert 파일에서 설명해놓았듯이,
@@ -217,8 +224,8 @@ void ofApp::draw(){ // draw() 는 렌더링루프 함수라고 했지?
 //    shader.setUniform4f("add", glm::vec4(0.0, 0.0, 0.0, 0.0));
     
     // 빨강색을 곱할 때
-    shader.setUniform4f("multiply", glm::vec4(1.0, 0.0, 0.0, 1.0));
-    shader.setUniform4f("add", glm::vec4(0.0, 0.0, 0.0, 0.0));
+//    shader.setUniform4f("multiply", glm::vec4(1.0, 0.0, 0.0, 1.0));
+//    shader.setUniform4f("add", glm::vec4(0.0, 0.0, 0.0, 0.0));
 
     // quad 메쉬를 그려달라고 gpu에 지시하는 명령 -> 드로우콜이라고 했지?
     // draw() 및 setup() 함수 모두에 접근하기 위해 ofApp.h 헤더파일에 quad 변수를 선언한 것!
